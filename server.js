@@ -1,6 +1,7 @@
 const express = require("express");
 const mysql2 = require("./mysql2.config");
 const mysql = require("mysql2");
+const e = require("express");
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -56,11 +57,53 @@ app.get("/api/movies", (req, res) => {
 	});
 });
 
-app.delete("/api/movies/:id", (req, res) => {});
+app.delete("/api/reviews/:id", (req, res) => {
+    db.query("DELETE FROM reviews WHERE id = ?", req.params.id,(err, result)=>{
+        if(err){
+            res.send({
+                status: "error",
+                message: err.message,
+            });
+        }
+        res.send({
+            status: "success",
+            result,  
+        });
 
-app.get("/api/reviews", (req, res) => {});
+    });
+   
+});
 
-app.put("/api/reviews/:id", (req, res) => {});
+app.get("/api/reviews", (req, res) => {
+    db.query("SELECT reviews.id, review, movie_name FROM reviews JOIN movies ON reviews.movie_id = movies.id", (err, result) =>{
+        if(err){
+            res.send({
+                status: "error",                                                            
+                message: err.message,
+            });
+        }
+        res.send({
+            status: "success",
+            result,
+        });
+    });
+    
+});
+
+app.put("/api/reviews/:id", (req, res) => {
+    db.query("UPDATE reviews SET review = ? WHERE  id= ? ", [req.body.review, req.params.id],(err,result)=>{
+        if(err){
+            res.send({
+                status: "error",                                                            
+                message: err.message,
+            });
+        }
+        res.send({
+            status: "success",
+            result,
+        })    
+    });
+});
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
